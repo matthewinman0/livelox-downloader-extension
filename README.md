@@ -1,6 +1,6 @@
-## Livelox Map Downloader
+## Livelox Data Downloader
 
-The Livelox Map Downloader is a lightweight Chrome extension that allows you to download high-quality maps directly from Livelox.
+Livelox Data Downloader fetches all event data in a .json file. This can then be used to extract the map, participant data, event data, control locatons and more from the current class.
 
 ### 🚀 Installation
 To install the extension manually in Chrome:
@@ -13,6 +13,6 @@ To install the extension manually in Chrome:
 
 4. (Optional) Click the puzzle icon in your toolbar, then pin Livelox Map Downloader for quick access.
 
-
 ### 📄 License
 This project is licensed under the MIT License. See the [LICENSE](https://choosealicense.com/licenses/mit/) file for full details.
+ 
