@@ -12,6 +12,30 @@ h1 {
     text-align: center;
 }
 
+#log {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.download-options {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+}
+
+.download-options label {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.download-options input {
+    margin-right: 8px;
+}
+
 button {
     width: 100%;
     border: none;

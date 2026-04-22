@@ -3,6 +3,8 @@ chrome.webRequest.onBeforeRequest.addListener(
 	async (details) => {
 		if (details.method !== 'GET' || !details.url.includes('class-storage'))
 			return;
+		
+		if (details.tabId < 0) return;
 	
 		const tab = await chrome.tabs.get(details.tabId);
 		if (!tab || !tab.url || !tab.url.startsWith('https://www.livelox.com/Viewer/'))
