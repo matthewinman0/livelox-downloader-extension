@@ -1,5 +1,6 @@
+
 // ------------------------------
-// DOWNLOAD
+// DOWNLOAD HELPERS
 // ------------------------------
 
 function downloadJSON(chrome, data, filename) {
@@ -18,9 +19,7 @@ function downloadJSON(chrome, data, filename) {
 
 async function downloadPNG(chrome, map, filename) {
     const imageUrl = map?.imageUrl || map?.image || map?.url;
-    if (!imageUrl) {
-        throw new Error("No image URL found in map data");
-    }
+    if (!imageUrl) throw new Error("No image URL found in map data");
 
     const res = await fetch(imageUrl);
     const blob = await res.blob();
@@ -33,6 +32,10 @@ async function downloadPNG(chrome, map, filename) {
         conflictAction: "uniquify"
     });
 }
+
+// ------------------------------
+// ZIP EXPORT
+// ------------------------------
 
 async function downloadZIP(chrome, data, filename) {
     const zip = new JSZip();
@@ -84,7 +87,7 @@ async function downloadIOFXML(chrome, data, filename) {
 
 function generateIOFXML(data) {
     const eventName = data.event || "Livelox Event";
-    const className = "Class";
+    const className = data.classStorage?.courses?.[0]?.name || "Class";
     const createTime = new Date().toISOString();
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -132,6 +135,7 @@ function generateIOFXML(data) {
         xml += `
         <Time>${escapeXml(String(time))}</Time>
         <Status>${escapeXml(status)}</Status>
+        
       </Result>
     </PersonResult>`;
     });
@@ -143,14 +147,66 @@ function generateIOFXML(data) {
     return xml;
 }
 
-function getIntervalSeconds(interval) {
-    const start = Date.parse(interval.start);
-    const end = Date.parse(interval.end);
-    if (Number.isNaN(start) || Number.isNaN(end) || end < start) return "ERORR";
-    else
-        return Math.floor((end - start) / 1000);
+
+function downloadRoutes(chrome, json, filename = "livelox_routes.txt") {
+    const routes = findRoutesAnywhere(json);
+
+    if (!routes.length) {
+        throw new Error("No routes found");
+    }
+
+    const output = routes.join("\n\n"); // separate each route
+
+    const blob = new Blob([output], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    chrome.downloads.download({
+        url,
+        filename,
+        conflictAction: "uniquify"
+    });
 }
 
+// ------------------------------
+// UTILS
+// ------------------------------
+
+function getIntervalSeconds(interval) {
+    const start = Date.parse(interval?.start);
+    const end = Date.parse(interval?.end);
+    if (!start || !end || end < start) return 0;
+    return Math.floor((end - start) / 1000);
+}
+
+function findRoutesAnywhere(obj, results = []) {
+    if (!obj) return results;
+
+    // If it's a string, check if it looks like a route blob
+    if (typeof obj === "string") {
+        // IOF route blobs are usually long base64 strings
+        if (obj.length > 100 && /^[A-Za-z0-9+/=]+$/.test(obj)) {
+            results.push(obj);
+        }
+        return results;
+    }
+
+    // Arrays → scan each item
+    if (Array.isArray(obj)) {
+        for (const item of obj) {
+            findRoutesAnywhere(item, results);
+        }
+        return results;
+    }
+
+    // Objects → scan all values
+    if (typeof obj === "object") {
+        for (const key in obj) {
+            findRoutesAnywhere(obj[key], results);
+        }
+    }
+
+    return results;
+}
 
 function escapeXml(unsafe) {
     return unsafe.replace(/[<>&'"]/g, (c) => {

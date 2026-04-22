@@ -110,7 +110,16 @@ async function onClick() {
         } catch (e) {
             log(`IOF XML generation failed: ${e.message}`);
         }
+    } else if (downloadType === 'routes') {
+        try {
+            log("Generating routes...");
+            await downloadRoutes(chromeAPI, output, "livelox_routes.txt");
+            log("Routes downloaded");
+        } catch (e) {
+            log(`Routes generation failed: ${e.message}`);
+        }
     }
+
 
     log("Done");
 }
